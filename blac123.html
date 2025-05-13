@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Animated Calendar &amp; Clock</title> 
+  <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Montserrat:wght@300;600&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .container {
+            position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            z-index: 10;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+            50% { transform: translateY(-20px) rotateX(5deg) rotateY(5deg); }
+        }
+        
+        .calendar {
+            margin-bottom: 30px;
+            perspective: 1000px;
+        }
+        
+        .month-year {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateZ(20px);
+        }
+        
+        .date-container {
+            display: inline-block;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        
+        .date {
+            font-size: 100px;
+            font-weight: bold;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            transition: all 0.5s ease;
+        }
+        
+        .date-shadow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 100px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.2);
+            line-height: 1;
+            z-index: 1;
+            transition: all 0.5s ease;
+        }
+        
+        .day {
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transform: translateZ(10px);
+        }
+        
+        .clock {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 60px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transform: translateZ(30px);
+        }
+        
+        .colon {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .seconds {
+            font-size: 30px;
+            align-self: flex-end;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .seconds.active {
+            color: #ffcc00;
+            transform: scale(1.1);
+        }
+        
+        .time-segment {
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .time-segment:hover {
+            transform: translateY(-5px);
+            text-shadow: 0 5px 15px rgba(255, 255, 255, 0.5);
+        }
+    </style> 
+ </head> 
+ <body> 
+  <div class="container"> 
+   <div class="calendar"> 
+    <div class="month-year" id="month-year">
+     MONTH YEAR
+    </div> 
+    <div class="date-container"> 
+     <div class="date-shadow" id="date-shadow">
+      00
+     </div> 
+     <div class="date" id="date">
+      00
+     </div> 
+    </div> 
+    <div class="day" id="day">
+     DAY
+    </div> 
+   </div> 
+   <div class="clock"> <span class="time-segment" id="hours">00</span> <span class="colon">:</span> <span class="time-segment" id="minutes">00</span> <span class="seconds" id="seconds">00</span> 
+   </div> 
+  </div> 
+  <script>
+        // Create particles
+        function createParticles() {
+            const particlesCount = 30;
+            for (let i = 0; i < particlesCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 10 + 5;
+                const posX = Math.random() * window.innerWidth;
+                const posY = Math.random() * window.innerHeight;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}px`;
+                particle.style.top = `${posY}px`;
+                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                
+                document.body.appendChild(particle);
+            }
+        }
+        
+        // Update time with animations
+        function updateTime() {
+            const now = new Date();
+            
+            // Calendar elements
+            const monthYear = now.toLocaleString('default', { month: 'long' }).toUpperCase() + ' ' + now.getFullYear();
+            const date = now.getDate();
+            const day = now.toLocaleString('default', { weekday: 'long' }).toUpperCase();
+            
+            // Animate date change
+            const dateElement = document.getElementById('date');
+            const dateShadow = document.getElementById('date-shadow');
+            if (dateElement.textContent != date) {
+                dateElement.style.transform = 'scale(0.8)';
+                dateShadow.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    dateElement.textContent = date;
+                    dateShadow.textContent = date;
+                    dateElement.style.transform = 'scale(1.1)';
+                    dateShadow.style.transform = 'scale(1.1)';
+                    
+                    setTimeout(() => {
+                        dateElement.style.transform = 'scale(1)';
+                        dateShadow.style.transform = 'scale(1)';
+                    }, 200);
+                }, 200);
+            }
+            
+            document.getElementById('month-year').textContent = monthYear;
+            document.getElementById('day').textContent = day;
+            
+            // Clock elements
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            // Animate seconds
+            const secondsElement = document.getElementById('seconds');
+            secondsElement.classList.add('active');
+            setTimeout(() => secondsElement.classList.remove('active'), 300);
+            
+            // Update clock
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+        
+        // Initialize
+        createParticles();
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Add mouse move effect
+        document.addEventListener('mousemove', (e) => {
+            const container = document.querySelector('.container');
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            container.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+    </script> 
+ 
+</body></html>
